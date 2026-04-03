@@ -31,9 +31,9 @@ int main() {
     cout << setprecision (2) << fixed;//Sets output to 2-decimal precision fixed output
 
     //Gets user input
-    cout << "Please enter the number of copies sold: " << endl;
+    cout << "\n\n  Please enter the number of copies sold: " << endl;
     cin >> amountSold;
-    cout << "Please enter the net price: " << endl;
+    cout << "  Please enter the net price: " << endl;
     cin >> netPrice;
 
     //Calculates totals for options 1 and 2
@@ -56,13 +56,13 @@ int main() {
     }
 
     //Outputs results
-    cout << "Option 1 will pay $" << DELIVERY_AMOUNT << " on delivery plus $" << PUBLISHING_AMOUNT <<
+    cout << "  Option 1 will pay $" << DELIVERY_AMOUNT << " on delivery plus $" << PUBLISHING_AMOUNT <<
         " upon publishing for a total of $" << option1Total << endl;
-    cout << "Option 2 will pay " << OPTION_2_ROYALTY_RATE * 100 << "% of sales, for a total of $" << option2Total << endl;
-    cout <<"Option 3 will pay " << OPTION_3_BASE_ROYALTY_RATE * 100 << "% of sales for the first " <<
+    cout << "  Option 2 will pay " << OPTION_2_ROYALTY_RATE * 100 << "% of sales, for a total of $" << option2Total << endl;
+    cout <<"   3 will pay " << OPTION_3_BASE_ROYALTY_RATE * 100 << "% of sales for the first " <<
         OPTION_3_ROYALTY_THRESHOLD << " sales plus " << OPTION_3_BONUS_ROYALTY_RATE * 100 <<
         "% for all remaining sales, for a total of $" << option3Total << endl;
-    cout << "The best option is " << bestOption << "." << endl;
+    cout << "  The best option is " << bestOption << "." << endl;
 
     getch();
 }
