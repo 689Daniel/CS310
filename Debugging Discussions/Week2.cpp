@@ -1,36 +1,25 @@
 /*
- *Student Name: Daniel Preller
- *File Name: Week2.cpp
- *Date: 3/30/2026
- */
+*Student Name: Daniel Preller
+*File Name: Week1.cpp
+*Date: 3/25/2026
+*/
 
-#include <conio.h>
 #include <iostream>
+#include <conio.h>
 
 using namespace std;
 
 int main() {
-    int miles;
+    //Gets first user input
+    value1;
+    cout << "\n\n  Please enter an integer: ";
+    cin >> value1;
 
-    //Gets user input
-    cout << "Enter the number of miles to be converted to feet: ";
-    cin >> miles;
+    \\Gets second user input
+    int value2;
+    cout << "\n\n  Please enter another integer: ";
+    cin >> value2;
 
-    int feet = miles * 5280; //Converts miles to feet (the number is correct and not a trick logic error)
-
-    //Properly pluralizes "mile" in output
-    //Compatability with negative numbers is excluded for demonstration purposes
-    string milesPlural;
-    if miles > 1 {
-        milesPlural = "miles";
-    } else if (miles = 0) {
-        milesPlural = "miles";
-    } else {
-        milesPlural = "mile";
-    }
-
-    cout << miles << " " << milesPlural << " is equal to " << feet << " feet" << endl;
-
-    getch();//Halts execution until user presses enter
-    return 0;
+    cout >> "\n\n  " << value1 << " times " << value2 << " equals " << value1 * value2 << endl;//Prints results
+    getch();//Stops execution until user presses enter
 }
