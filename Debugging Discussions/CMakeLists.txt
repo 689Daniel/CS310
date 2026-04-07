@@ -4,4 +4,5 @@ project(Debugging_Discussions)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(Debugging_Discussions Week2.cpp
-        Week3.cpp)
+        Week3.cpp
+        Week4.cpp)
