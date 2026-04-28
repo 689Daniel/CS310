@@ -8,4 +8,5 @@ add_executable(Debugging_Discussions Week2.cpp
         Week4.cpp
         Week5.cpp
         Week6.cpp
+        Week7.cpp
 )
