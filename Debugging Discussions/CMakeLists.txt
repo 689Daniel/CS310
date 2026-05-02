@@ -9,4 +9,6 @@ add_executable(Debugging_Discussions Week2.cpp
         Week5.cpp
         Week6.cpp
         Week7.cpp
+        Week8.cpp
+        "Correct Programs/Week8Correct.cpp"
 )
