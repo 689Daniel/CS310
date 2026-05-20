@@ -91,7 +91,7 @@ string getCandidateName(int candidateNumber) {// Gets a candidate's name, using 
     while (!(cin >> name) || !isAlphabeticString(name) || name.empty() || name.length() > 25) {
         cout << "  ERROR: Please try again (names can be a maximum of 25 characters and must be alphabetical): ";
     }
-    cin.ignore(INT_MAX, '\n');// Removes any output after whitespace
+    cin.ignore(INT_MAX, '\n');// Removes any input after whitespace
     return name;
 }
 
@@ -102,14 +102,15 @@ int getVotes(string candidate) {// Gets the number of votes for a candidate, usi
     return votes;
 }
 
+// Gets an int above a specified minimum from the user, using a custom prompt and error message
 int getIntAboveMin(int min, const string& prompt, const string& errorMessage) {
     cout << prompt;
     int number;
-    while (!(cin >> number) || number < min) {
+    while (!(cin >> number) || number < min) {// Repeatedly gets a value from the user until it is valid
         cin.clear();
         cin.ignore(INT_MAX, '\n');
         cout << errorMessage;
     }
-    cin.ignore(INT_MAX, '\n');
+    cin.ignore(INT_MAX, '\n');// Removes any extra input
     return number;
 }
