@@ -1,7 +1,7 @@
 /*
  * Student Name: Daniel Preller
- * File Name: Week10.cpp
- * Date: 5/20/2026
+ * File Name: Week11Correct.cpp
+ * Date: 5/27/2026
 */
 
 #include <iostream>
@@ -14,12 +14,80 @@ using namespace std;
 string boolToString(bool value, string trueString, string falseString);
 int getIntInRange(int min, int max);
 
+// Enum used for representing types of menu items
+enum ItemType {
+    None,
+    Food,
+    Drink
+};
+
+// Class for the basic functions of a list required by the menu
+template <typename T>
+class BasicList {
+private:
+    int size;
+    T* listArray = nullptr;
+
+public:
+    // Default constructor (creates a size 0 list)
+    BasicList() {
+        size = 0;
+        listArray = new T[size];
+    }
+
+    // Constructor for a specific size
+    BasicList(int size) {
+        this->size = size;
+        listArray = new T[size];
+    }
+
+    // Destructor
+    ~BasicList() {
+        delete[] listArray;
+    }
+
+    // Appends an item to the list, using a method similar to an array list
+    void add(T item) {
+        T* newArray = new T[size + 1];
+        for (int i = 0; i < size; i++) {
+            newArray[i] = listArray[i];
+        }
+        delete [] listArray;
+        size++;
+        newArray[size - 1] = item;
+        listArray = newArray;
+    }
+
+    // Returns the size of the list
+    int getSize() {
+        return size;
+    }
+
+    // Returns a reference to the specified value
+    // Functionality is identical to [] operator
+    T& get(int index) {
+        if (index > size - 1) {
+            throw out_of_range("Index out of range");
+        } else {
+            return listArray[index];
+        }
+    }
+
+    // Overloads [] operator to allow for direct access to list items
+    T& operator[] (int index) {
+        if (index > size - 1) {
+            throw out_of_range("Index out of range");
+        } else {
+            return listArray[index];
+        }
+    }
+};
+
 // Abstract class that stores name and price information for menu items
 class MenuItem {
 protected:
     string name;
     double price;
-    string type = "None";
 
 public:
     MenuItem() {// Default constructor
@@ -54,8 +122,9 @@ public:
         return price;
     }
 
-    string getType() {
-        return type;
+    // Returns the type of the item (None for abstract class)
+    virtual ItemType getType() {
+        return None;
     }
 
     // Prints the item as a line in a menu
@@ -65,7 +134,7 @@ public:
     }
 
     // Pure virtual function for printing a detailed menu line
-    void printDetailedMenuLine() = 0;
+    virtual void printDetailedMenuLine() = 0;
 };
 
 // Represents a food item in a menu
@@ -75,19 +144,18 @@ private:
 
 public:
     // Default constructor
-    FoodItem(): MenuItem() {
-        type = "Food";
-    }
+    FoodItem(): MenuItem() {}
 
     // Constructor matching that of superclass
-    FoodItem(string name, double price): MenuItem(name, price) {
-        type = "Food";
-    }
+    FoodItem(string name, double price): MenuItem(name, price) {}
 
     // Constructor for all fields
     FoodItem(string name, double price, bool glutenFree): MenuItem(name, price) {
         this->glutenFree = glutenFree;
-        type = "Food";
+    }
+
+    ItemType getType() override {
+        return Food;
     }
 
     // Prints the detailed menu line, including whether the item is gluten-free
@@ -108,9 +176,7 @@ private:
 
 public:
     // Default constructor
-    DrinkItem(): DrinkItem("Item", 0) {
-        type = "Drink";
-    }
+    DrinkItem(): DrinkItem("Item", 0) {}
 
     // Constructor matching that of parent class
     DrinkItem(string name, double price): MenuItem(name, price) {
@@ -118,14 +184,16 @@ public:
         // regular price, respectively, but cannot be negative
         smallPrice = max(price - 0.50, 0.0);
         largePrice = price + 0.50;
-        type = "Drink";
     }
 
     // Constructor for all fields
     DrinkItem(string name, double price, double smallPrice, double largePrice) : MenuItem(name, price) {
         this->smallPrice = smallPrice;
         this->largePrice = largePrice;
-        type = "Drink";
+    }
+
+    ItemType getType() override {
+        return Drink;
     }
 
     // Prints a detailed menu line, including prices for all sizes
@@ -159,23 +227,21 @@ public:
 class Menu {
 private:
     string name;
-    const int NUMBER_OF_ITEMS;
-    MenuItem* *itemsPointer = nullptr;// Pointer to an array of menu item pointers, allowing for dynamic resizing and polymorphism
+    BasicList<MenuItem*> *itemsPointer = nullptr;// Points to a list of item pointer, allowing for polymorphism
+    BasicList<MenuItem*> items;// Convenience variable so that the item pointer does not have to be repeatedly dereferenced
 
 public:
-
     // Constructor using a name and a number of items
-    Menu(string name, int numberOfItems) : NUMBER_OF_ITEMS(numberOfItems) {
-        if (numberOfItems < 0) {
-            throw invalid_argument("Number of items must be positive");
-        }
+    Menu(string name) {
         this->setName(name);
-        itemsPointer = MenuItem* [numberOfItems];// Creates an array according to the number of items specified
+        itemsPointer = new BasicList<MenuItem*>(0);
+        items = *itemsPointer;
     }
 
     // Destructor
     ~Menu() {
-        delete [] itemsPointer;
+        itemsPointer = nullptr;
+        delete itemsPointer;
     }
 
     // Name set method
@@ -183,9 +249,9 @@ public:
         this->name = name;
     }
 
-    // Sets an item, which can be any concrete menu item type
-    void addItem(int itemNumber, MenuItem *item) {
-        itemsPointer[itemNumber] = item;
+    // Adds an item, which can be any concrete menu item type
+    void addItem(MenuItem* item) {
+        items.add(item);
     }
 
     // Gets the name of the menu
@@ -194,9 +260,9 @@ public:
     }
 
     // Gets the type for a specific item in the menu
-    string getItemType(int itemNumber) {
-        if (itemNumber >= 0 && itemNumber < NUMBER_OF_ITEMS) {
-            return itemsPointer[itemNumber]->getType();
+    ItemType getItemType(int itemNumber) {
+        if (itemNumber >= 0 && itemNumber < items.getSize()) {
+            return items[itemNumber]->getType();
         } else {
             throw invalid_argument("Invalid item number");
         }
@@ -208,9 +274,9 @@ public:
         cout << "  " << name << " Menu:" << endl;
         cout << "    " << setw(30) << left << "Item" << "Price" << endl;
 
-        for (int itemNumber = 0; itemNumber < NUMBER_OF_ITEMS; itemNumber++) {
+        for (int itemNumber = 0; itemNumber < items.getSize(); itemNumber++) {
             cout << "  " << itemNumber + 1 << " ";// Item numbers are displayed starting from 1
-            itemsPointer[itemNumber].printBasicMenuLine();
+            items[itemNumber]->printBasicMenuLine();
         }
         cout << endl;
     }
@@ -222,10 +288,10 @@ public:
         cout << "    " << setw(20) << left << "Item" << setw(10) << "Small" << setw(10) << "Regular"
         << setw(10) << "Large" << endl;
 
-        for (int itemNumber = 0; itemNumber < NUMBER_OF_ITEMS; itemNumber++) {
-            if (itemsPointer[itemNumber]->getType() == "Drink") {// Only prints drink items
+        for (int itemNumber = 0; itemNumber < items.getSize(); itemNumber++) {
+            if (items[itemNumber]->getType() == Drink) {// Only prints drink items
                 cout << "  " << itemNumber + 1 << " ";// Item numbers are displayed starting from 1
-                itemsPointer[itemNumber]->printDetailedMenuLine();
+                items[itemNumber]->printDetailedMenuLine();
             }
         }
     }
@@ -236,10 +302,10 @@ public:
         cout << "  " << name << " Food Menu:" << endl;
         cout << "    " << setw(20) << left << "Item" << setw(15) << "Gluten-free" << setw(10) << "Price" << endl;
 
-        for (int itemNumber = 0; itemNumber < NUMBER_OF_ITEMS; itemNumber++) {
-            if (itemsPointer[itemNumber]->getType() == "Food") {// Only prints food items
+        for (int itemNumber = 0; itemNumber < items.getSize(); itemNumber++) {
+            if (items[itemNumber]->getType() == Food) {// Only prints food items
                 cout << "  " << itemNumber + 1<< " ";// Item numbers are displayed starting from 1
-                itemsPointer[itemNumber]->printDetailedMenuLine();
+                items[itemNumber]->printDetailedMenuLine();
             }
         }
     }
@@ -249,13 +315,13 @@ public:
     void orderItem(int itemNumber, int size, double& total) {
         itemNumber--;// Because user-facing item numbers are indexed from 1, decrements the item number
 
-        if (itemNumber < 0 || itemNumber >= NUMBER_OF_ITEMS) {// Ensures item is on the menu
+        if (itemNumber < 0 || itemNumber >= items.getSize()) {// Ensures item is on the menu
             throw invalid_argument("Invalid item number");
         }
 
         string sizeName = "";// Used to display the size in the output
 
-        if (itemsPointer[itemNumber]->getType() == "Drink") {// Gets the size to display for a drink item
+        if (items[itemNumber]->getType() == Drink) {// Gets the size to display for a drink item
             switch (size) {
                 case 1:
                     sizeName = "small ";
@@ -271,8 +337,8 @@ public:
         }
 
         // Adds the item's price to the total and displays the results
-        total += itemsPointer[itemNumber]->getPrice(size);
-        cout << "\n  Added one " << sizeName << itemsPointer[itemNumber]->getName() << " to your order." << endl;
+        total += items[itemNumber]->getPrice(size);
+        cout << "\n  Added one " << sizeName << items[itemNumber]->getName() << " to your order." << endl;
         cout << "  Your total is now $" << fixed << setprecision(2) << total << endl;
     }
 };
@@ -306,14 +372,15 @@ int main() {
     }
     while (cafeName.empty());
 
-    Menu menu(cafeName, NUMBER_OF_FOOD_ITEMS + NUMBER_OF_DRINK_ITEMS);// Creates the menu
+    Menu menu(cafeName);// Creates the menu
 
+    int i = 0;
     // Populates menu with food and drink items
     for (int i = 0; i < NUMBER_OF_FOOD_ITEMS; i++) {
-        menu.addItem(i, new FoodItem(foodItems[i], foodPrices[i], foodGlutenFreeStatus[i]));
+        menu.addItem(new FoodItem(foodItems[i], foodPrices[i], foodGlutenFreeStatus[i]));
     }
     for (int i = 0; i < NUMBER_OF_DRINK_ITEMS; i++) {
-        menu.addItem(i +  NUMBER_OF_FOOD_ITEMS, new DrinkItem(drinkItems[i], drinkPrices[i]));
+        menu.addItem(new DrinkItem(drinkItems[i], drinkPrices[i]));
     }
 
     cout << "  Welcome to " << menu.getName() << "!" << endl;
@@ -388,7 +455,7 @@ void foodMenuLoop(Menu& menu, double& total, int numberOfItems) {
 
         if (itemSelection == 0) {// Ends the loop if the sentinel is entered
             break;
-        } else if (menu.getItemType(itemSelection - 1) != "Food") {// Displays an error message if a valid item is entered but it is not on the food menu
+        } else if (menu.getItemType(itemSelection - 1) != Food) {// Displays an error message if a valid item is entered but it is not on the food menu
             cout << "  That item is not on the food menu." << endl;
         } else {// Orders an item
             menu.orderItem(itemSelection, 2, total);// Any value can be used for size for a food item
@@ -409,7 +476,7 @@ void drinkMenuLoop(Menu& menu, double& total, int numberOfItems) {
 
         if (itemSelection == 0) {// Ends the loop if the sentinel is entered
             break;
-        } else if (menu.getItemType(itemSelection) != "Drink") {// Displays an error message if a valid item is entered but it is not on the drink menu
+        } else if (menu.getItemType(itemSelection - 1) != Drink) {// Displays an error message if a valid item is entered but it is not on the drink menu
             cout << "  That item is not on the drink menu." << endl;
         } else {// Gets the user's size selection and then orders the item
             cout << "\n  Please select a size." << endl;
@@ -425,14 +492,22 @@ int getIntInRange(int min, int max) {
     int userInput;
 
     // Executes until a valid integer is entered
-    while (!(cin >> userInput) || userInput < min || userInput > max) {
-        cout << "  Input error. Please try again: ";
-        cin.clear();
-        cin.ignore(INT_MAX, '\n');
+    while (true) {
+        try {
+            if (!(cin >> userInput)) {// Gives error if an invalid data type is entered
+                throw runtime_error("Invalid input type");
+            }
+            if (userInput < min || userInput > max) {// Gives an error if an out-of-range numer is entered
+                throw runtime_error("Invalid input value");
+            }
+            cin.ignore(INT_MAX, '\n');// Clears excess values from the stream
+            return userInput;// Returns the entered number
+        } catch (...) {// Resets and clears the stream if invalid data is entered
+            cout << "  Input error. Please try again: ";
+            cin.clear();
+            cin.ignore(INT_MAX, '\n');
+        }
     }
-
-    cin.ignore(INT_MAX, '\n');// Clears the input stream of any excess data after a space
-    return userInput;
 }
 
 // Returns a string depending on the value of a bool
